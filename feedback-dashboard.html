@@ -1,0 +1,580 @@
+<html lang="he" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>דשבורד משוב, גרסה v116</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
+
+    body { font-family: 'Heebo', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; }
+    * { box-sizing: border-box; overflow-wrap: break-word; }
+
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 20px; }
+
+    .editable-input {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      padding: 4px 8px;
+      width: 100%;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+
+    .flexible-textarea {
+      min-height: 120px;
+      display: block;
+      width: 100%;
+      white-space: pre-wrap;
+      outline: none;
+      line-height: 1.6;
+      padding: 15px;
+      background-color: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .flexible-textarea:empty:before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+    }
+
+    .chart-container { position: relative; height: 350px; width: 100%; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 12px; font-family: Arial, sans-serif !important; }
+      .no-print, #uploadSection, header, #statusArea, button { display: none !important; }
+      #reportContainer { display: block !important; border: none !important; padding: 0 !important; width: 100% !important; }
+      .break-inside-avoid { page-break-inside: avoid; break-inside: avoid; }
+      #metadataSection { background-color: #1e293b !important; color: white !important; border: 1px solid #000; border-radius: 8px; }
+      .editable-input { border: none; color: white !important; }
+      .bg-indigo-50 { background-color: #eef2ff !important; border: 1px solid #c7d2fe !important; }
+      .bg-emerald-50 { background-color: #ecfdf5 !important; border: 1px solid #6ee7b7 !important; }
+      .bg-yellow-50 { background-color: #fefce8 !important; border: 1px solid #fde047 !important; }
+      .bg-rose-50 { background-color: #fff1f2 !important; border: 1px solid #fda4af !important; }
+      .chart-container { height: 300px !important; margin-bottom: 20px; }
+      .flexible-textarea { border: none; padding: 0; resize: none; }
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-12{height:3rem}.w-12{width:3rem}.w-full{width:100%}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.break-inside-avoid{break-inside:avoid}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-stretch{align-items:stretch}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t-4{border-top-width:4px}.border-dashed{border-style:dashed}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-50{--tw-border-opacity:1;border-color:rgb(239 246 255 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-indigo-200{--tw-border-opacity:1;border-color:rgb(199 210 254 / var(--tw-border-opacity, 1))}.border-indigo-300{--tw-border-opacity:1;border-color:rgb(165 180 252 / var(--tw-border-opacity, 1))}.border-indigo-500{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity:1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-rose-100{--tw-border-opacity:1;border-color:rgb(255 228 230 / var(--tw-border-opacity, 1))}.border-rose-500{--tw-border-opacity:1;border-color:rgb(244 63 94 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-500{--tw-border-opacity:1;border-color:rgb(100 116 139 / var(--tw-border-opacity, 1))}.border-slate-900{--tw-border-opacity:1;border-color:rgb(15 23 42 / var(--tw-border-opacity, 1))}.border-yellow-100{--tw-border-opacity:1;border-color:rgb(254 249 195 / var(--tw-border-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-yellow-50{--tw-bg-opacity:1;background-color:rgb(254 252 232 / var(--tw-bg-opacity, 1))}.p-12{padding:3rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.pb-2{padding-bottom:0.5rem}.pb-4{padding-bottom:1rem}.pl-4{padding-left:1rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-indigo-400{--tw-text-opacity:1;color:rgb(129 140 248 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-indigo-900{--tw-text-opacity:1;color:rgb(49 46 129 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-rose-800{--tw-text-opacity:1;color:rgb(159 18 57 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-yellow-800{--tw-text-opacity:1;color:rgb(133 77 14 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-indigo-50:hover{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:bg-red-100:hover{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-indigo-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(99 102 241 / var(--tw-ring-opacity, 1))}@media (min-width: 768px){.md\:flex-row{flex-direction:row}}@media print{.print\:block{display:block}}</style></head>
+
+<body>
+  <div class="container mx-auto p-6 max-w-5xl" id="mainContainer">
+
+    <header class="flex flex-col gap-4 mb-8 no-print">
+      <div>
+        <h1 class="text-3xl font-bold text-indigo-900">דוח סיכום משוב</h1>
+        <p class="text-gray-500 text-sm">ניתוח נתונים ותובנות פדגוגיות</p>
+      </div>
+
+      <div class="flex flex-col gap-3 w-full">
+        <div id="actionsBar" class="flex flex-wrap gap-2">
+          <button type="button" id="btnClear" class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg font-bold shadow-sm transition text-sm">נקה נתונים</button>
+          <button type="button" id="btnCopyTop" class="bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg font-bold shadow-sm transition text-sm">העתק נתונים ל ChatGPT</button>
+          <button type="button" id="btnHtml" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition text-sm">הורד HTML</button>
+        </div>
+      </div>
+    </header>
+
+    <div id="uploadSection" class="bg-white p-12 rounded-2xl border-2 border-dashed border-indigo-300 mb-8 no-print text-center hover:bg-indigo-50 transition cursor-pointer" role="button" tabindex="0">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-indigo-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+      <label class="block text-xl font-bold text-indigo-900 mb-2 cursor-pointer">לחץ כאן להעלאת קובץ CSV</label>
+      <input type="file" id="uploadCsv" accept=".csv" class="hidden">
+      <p id="statusArea" class="text-sm text-indigo-600 mt-4 font-bold hidden">טוען נתונים</p>
+    </div>
+
+    <div id="reportContainer" class="hidden space-y-6 bg-white p-8 rounded-xl max-w-4xl mx-auto border border-slate-200">
+
+      <h1 class="text-2xl font-bold text-center text-indigo-900 mb-6 hidden print:block">דוח מסכם, סדנת למידה</h1>
+
+      <div id="metadataSection" class="bg-slate-800 text-white p-6 rounded-xl border border-slate-900 shadow-sm break-inside-avoid">
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div class="border-l border-slate-500 pl-4">
+            <h3 class="text-xs text-slate-300 uppercase font-bold mb-1">שם הסדנה</h3>
+            <input type="text" id="valWorkshop" class="editable-input text-center text-lg" value="...">
+          </div>
+          <div class="border-l border-slate-500 pl-4">
+            <h3 class="text-xs text-slate-300 uppercase font-bold mb-1">מנחה</h3>
+            <input type="text" id="valMentor" class="editable-input text-center text-lg" value="...">
+          </div>
+          <div>
+            <h3 class="text-xs text-slate-300 uppercase font-bold mb-1">מוסד</h3>
+            <input type="text" id="valSchool" class="editable-input text-center text-lg" value="...">
+            <div id="respondentCount" class="text-xs text-emerald-400 mt-1 font-bold"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 break-inside-avoid">
+        <div class="card bg-white p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm text-center">
+          <p class="text-xs font-bold text-gray-400 uppercase">מדד שביעות רצון</p>
+          <p id="kpiScore" class="text-3xl font-bold text-slate-800 mt-1">-</p>
+        </div>
+        <div class="card bg-white p-4 rounded-xl border-t-4 border-emerald-500 shadow-sm text-center">
+          <p class="text-xs font-bold text-gray-400 uppercase">הנושא החזק</p>
+          <p id="kpiHigh" class="text-lg font-bold text-emerald-700 mt-1 truncate">-</p>
+          <div id="kpiHighVal" class="text-xs text-slate-500">-</div>
+        </div>
+        <div class="card bg-white p-4 rounded-xl border-t-4 border-rose-500 shadow-sm text-center">
+          <p class="text-xs font-bold text-gray-400 uppercase">הנושא הטעון שיפור</p>
+          <p id="kpiLow" class="text-lg font-bold text-rose-700 mt-1 truncate">-</p>
+          <div id="kpiLowVal" class="text-xs text-slate-500">-</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl border border-blue-100 break-inside-avoid">
+        <h2 class="text-xl font-bold text-blue-900 mb-4 border-b border-blue-50 pb-2">סיכום נתונים כמותי</h2>
+        <div class="grid grid-cols-3 gap-4 text-sm">
+          <div class="bg-emerald-50 p-3 rounded border border-emerald-100">
+            <strong class="block text-emerald-800 mb-2">חוזקות, 70 אחוז ומעלה</strong>
+            <ul id="listHigh" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+          </div>
+          <div class="bg-yellow-50 p-3 rounded border border-yellow-100">
+            <strong class="block text-yellow-800 mb-2">לדיוק, בינוני</strong>
+            <ul id="listMed" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+          </div>
+          <div class="bg-rose-50 p-3 rounded border border-rose-100">
+            <strong class="block text-rose-800 mb-2">אתגרים, 20 אחוז ומטה</strong>
+            <ul id="listLow" class="list-disc list-inside text-slate-700 space-y-1"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm break-inside-avoid">
+        <h3 class="text-lg font-bold text-gray-700 mb-4 text-center">התפלגות תשובות, אחוזים מוערמים</h3>
+        <div class="chart-container">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-200 mt-6 break-inside-avoid">
+        <h2 class="text-lg font-bold text-indigo-900 mb-2">סיכום תובנות והמלצות</h2>
+        <div id="manualAnalysis" contenteditable="true" class="flexible-textarea w-full p-4 rounded-lg border border-indigo-300 focus:ring-2 focus:ring-indigo-500 text-slate-800 text-sm leading-relaxed bg-white" data-placeholder="הדבק כאן את הניתוח מה AI או כתוב סיכום משלך"></div>
+      </div>
+
+      <div class="text-center text-xs text-slate-400 mt-8 pb-4 break-inside-avoid">הופק באמצעות היחידה להערכה פסג״ה חדרה</div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    let currentComments = [];
+    let currentQuantData = "";
+    let chartInstance = null;
+    let globalData = { comments: [], scores: [], qStats: [] };
+
+    const COLS = { WS: 2, MEN: 3, SCH: 4, Q_START: 5, CMT: 11 };
+
+    const LABELS = [
+      "רלוונטיות התוכן",
+      "חדשנות ועניין",
+      "יישום בכיתה",
+      "מקצועיות המנחה",
+      "שיח ושיתוף",
+      "אווירה"
+    ];
+
+    const COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
+
+    function init() {
+      const upload = document.getElementById("uploadCsv");
+      const uploadSection = document.getElementById("uploadSection");
+
+      const btnClear = document.getElementById("btnClear");
+      const btnCopyTop = document.getElementById("btnCopyTop");
+      const btnHtml = document.getElementById("btnHtml");
+
+      if (uploadSection && upload) {
+        const openPicker = () => {
+          upload.click();
+        };
+        uploadSection.addEventListener("click", openPicker);
+        uploadSection.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
+        });
+      }
+
+      if (upload) upload.addEventListener("change", (e) => handleFile(e.target));
+      if (btnClear) btnClear.addEventListener("click", () => { location.reload(); });
+      if (btnCopyTop) btnCopyTop.addEventListener("click", copyPromptToClipboard);
+      if (btnHtml) btnHtml.addEventListener("click", downloadReportHtml);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+
+    function handleFile(input) {
+      if (!input || !input.files || !input.files[0]) return;
+
+      const status = document.getElementById("statusArea");
+      if (status) {
+        status.innerText = "מעבד נתונים";
+        status.classList.remove("hidden");
+      }
+
+      Papa.parse(input.files[0], {
+        header: false,
+        skipEmptyLines: "greedy",
+        complete: function (results) {
+          processResults(results.data);
+        },
+        error: function (err) {
+          alert("שגיאה בטעינת הקובץ: " + err.message);
+        }
+      });
+    }
+
+    function processResults(rows) {
+      if (!Array.isArray(rows) || rows.length === 0) {
+        alert("הקובץ ריק או לא תקין");
+        return;
+      }
+
+      let headerRowIndex = 0;
+      for (let i = 0; i < Math.min(rows.length, 15); i++) {
+        const row = rows[i] || [];
+        if (row.some(c => c && (String(c).includes("רלוונטי") || String(c).includes("תוכן הסדנה")))) {
+          headerRowIndex = i;
+          break;
+        }
+      }
+
+      const dataRows = rows.slice(headerRowIndex + 1).filter(r => {
+        const first = r && r[0] ? String(r[0]) : "";
+        return first.length > 5 && (first.includes("202") || first.includes("/") || first.includes("-"));
+      });
+
+      if (dataRows.length === 0) {
+        alert("לא נמצאו נתונים תקינים בקובץ, בדקי את פורמט התאריך בעמודה הראשונה");
+        return;
+      }
+
+      const workshops = dataRows.map(r => r[COLS.WS]).filter(Boolean);
+      const mentors = dataRows.map(r => r[COLS.MEN]).filter(Boolean);
+      const schools = dataRows.map(r => r[COLS.SCH]).filter(Boolean);
+
+      const elWs = document.getElementById("valWorkshop");
+      const elMentor = document.getElementById("valMentor");
+      const elSchool = document.getElementById("valSchool");
+      const elCount = document.getElementById("respondentCount");
+
+      if (elWs) elWs.value = getMode(workshops);
+      if (elMentor) elMentor.value = getMode(mentors);
+      if (elSchool) elSchool.value = [...new Set(schools.filter(s => String(s).length > 2))].join(", ");
+      if (elCount) elCount.innerText = String(dataRows.length) + " משיבים";
+
+      const qStats = LABELS.map(() => [0, 0, 0, 0, 0]);
+      const scores = LABELS.map(() => ({ pos: 0, med: 0, neg: 0, total: 0 }));
+
+      dataRows.forEach(row => {
+        for (let i = 0; i < LABELS.length; i++) {
+          const raw = row[COLS.Q_START + i];
+          if (!raw) continue;
+          const val = String(raw);
+
+          let rIdx = -1;
+          if (val.includes("רבה מאוד")) rIdx = 4;
+          else if (val.includes("רבה")) rIdx = 3;
+          else if (val.includes("בינונית")) rIdx = 2;
+          else if (val.includes("מועטה")) rIdx = 1;
+          else if (val.includes("כלל")) rIdx = 0;
+
+          if (rIdx > -1) {
+            qStats[i][rIdx]++;
+            const s = scores[i];
+            s.total++;
+            if (rIdx >= 3) s.pos++;
+            else if (rIdx === 2) s.med++;
+            else s.neg++;
+          }
+        }
+      });
+
+      const comments = dataRows
+        .map(r => r[COLS.CMT])
+        .map(v => (v === undefined || v === null) ? "" : String(v).trim())
+        .filter(c => c.length > 2);
+
+      globalData = { comments: comments, scores: scores, qStats: qStats };
+      currentComments = comments;
+
+      updateUI(scores, qStats);
+
+      const uploadSection = document.getElementById("uploadSection");
+      const reportContainer = document.getElementById("reportContainer");
+      if (uploadSection) uploadSection.classList.add("hidden");
+      if (reportContainer) reportContainer.classList.remove("hidden");
+
+      const status = document.getElementById("statusArea");
+      if (status) status.classList.add("hidden");
+    }
+
+    function updateUI(scores, qStats) {
+      const listHigh = document.getElementById("listHigh");
+      const listMed = document.getElementById("listMed");
+      const listLow = document.getElementById("listLow");
+
+      if (listHigh) listHigh.innerHTML = "";
+      if (listMed) listMed.innerHTML = "";
+      if (listLow) listLow.innerHTML = "";
+
+      currentQuantData = "";
+
+      const avgScores = [];
+
+      scores.forEach((s, i) => {
+        if (!s || s.total === 0) return;
+
+        const pPos = Math.round((s.pos / s.total) * 100);
+        const pMed = Math.round((s.med / s.total) * 100);
+        const pNeg = Math.round((s.neg / s.total) * 100);
+        const label = LABELS[i];
+
+        currentQuantData += label + ": " + pPos + "% חיובי\n";
+
+        if (listHigh && pPos >= 70) listHigh.innerHTML += "<li>" + label + " (" + pPos + "%)</li>";
+        if (listMed && pMed >= 30) listMed.innerHTML += "<li>" + label + " (" + pMed + "%)</li>";
+        if (listLow && pNeg >= 20) listLow.innerHTML += "<li>" + label + " (" + pNeg + "%)</li>";
+
+        avgScores.push({ label: label, pPos: pPos });
+      });
+
+      if (listHigh && !listHigh.innerHTML) listHigh.innerHTML = "<li>אין נתונים בולטים</li>";
+      if (listMed && !listMed.innerHTML) listMed.innerHTML = "<li>אין נתונים בולטים</li>";
+      if (listLow && !listLow.innerHTML) listLow.innerHTML = "<li>אין נתונים בולטים</li>";
+
+      if (avgScores.length) {
+        const overall = Math.round(avgScores.reduce((sum, item) => sum + item.pPos, 0) / avgScores.length);
+        const elScore = document.getElementById("kpiScore");
+        if (elScore) elScore.innerText = overall + "%";
+
+        const sorted = [...avgScores].sort((a, b) => b.pPos - a.pPos);
+        const high = sorted[0];
+        const low = sorted[sorted.length - 1];
+
+        const elHigh = document.getElementById("kpiHigh");
+        const elHighVal = document.getElementById("kpiHighVal");
+        const elLow = document.getElementById("kpiLow");
+        const elLowVal = document.getElementById("kpiLowVal");
+
+        if (elHigh) elHigh.innerText = high.label;
+        if (elHighVal) elHighVal.innerText = high.pPos + "% חיובי";
+        if (elLow) elLow.innerText = low.label;
+        if (elLowVal) elLowVal.innerText = low.pPos + "% חיובי";
+      }
+
+      const canvas = document.getElementById("mainChart");
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+      if (chartInstance) chartInstance.destroy();
+
+      const datasetLabels = ["כלל לא", "במידה מועטה", "במידה בינונית", "במידה רבה", "במידה רבה מאוד"];
+      const datasets = datasetLabels.map((label, rIdx) => ({
+        label: label,
+        data: qStats.map(counts => {
+          const total = counts.reduce((a, b) => a + b, 0);
+          return total ? (counts[rIdx] / total * 100) : 0;
+        }),
+        backgroundColor: COLORS[rIdx]
+      }));
+
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: { labels: LABELS, datasets: datasets },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          scales: {
+            x: { stacked: true, max: 100, ticks: { callback: v => v + "%" } },
+            y: { stacked: true }
+          },
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: { callbacks: { label: (c) => c.dataset.label + ": " + Math.round(c.raw) + "%" } }
+          }
+        }
+      });
+    }
+
+    function getMode(arr) {
+      if (!arr || !arr.length) return "לא זוהה";
+      const counts = new Map();
+      arr.forEach(v => {
+        const key = (v === undefined || v === null) ? "" : String(v).trim();
+        if (!key) return;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+      let best = "לא זוהה";
+      let bestCount = 0;
+      counts.forEach((count, key) => {
+        if (count > bestCount) {
+          bestCount = count;
+          best = key;
+        }
+      });
+      return best;
+    }
+
+    function cleanTextForPrompt(text) {
+      return String(text || "")
+        .replace(/\u00A0/g, " ")
+        .replace(/\s+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+
+    function copyPromptToClipboard() {
+      console.log("=== COPY FUNCTION START ===");
+      
+      const report = document.getElementById("reportContainer");
+      if (!report || report.classList.contains("hidden")) {
+        alert("ראשית העלי קובץ CSV כדי ליצור דוח");
+        return;
+      }
+
+      // קח את הערכים
+      const ws = document.getElementById("valWorkshop");
+      const men = document.getElementById("valMentor");
+      const sch = document.getElementById("valSchool");
+      const cnt = document.getElementById("respondentCount");
+      const manual = document.getElementById("manualAnalysis");
+
+      console.log("Elements found:", { ws: !!ws, men: !!men, sch: !!sch, cnt: !!cnt, manual: !!manual });
+
+      const workshop = (ws && ws.value) ? String(ws.value).trim() : "לא צוין";
+      const mentor = (men && men.value) ? String(men.value).trim() : "לא צוין";
+      const school = (sch && sch.value) ? String(sch.value).trim() : "לא צוין";
+      const countText = (cnt && cnt.innerText) ? String(cnt.innerText).trim() : "0";
+      const respondentCount = parseInt(countText.match(/\d+/)[0]) || 0;
+
+      const extraText = (manual && manual.innerText) ? String(manual.innerText).trim() : "";
+      const comments = Array.isArray(globalData.comments) ? globalData.comments.filter(c => String(c).trim().length > 0) : [];
+
+      // בנה את הפרומפט
+      let prompt = "דוח משוב - סדנת מורים\n";
+      prompt += "שם הסדנה: " + workshop + "\n";
+      prompt += "מנחה: " + mentor + "\n";
+      prompt += "מוסד: " + school + "\n";
+      prompt += "מספר משיבים: " + respondentCount + "\n\n";
+
+      prompt += "נתונים כמותיים (אחוז חיובי):\n";
+      prompt += (currentQuantData && currentQuantData.trim()) ? currentQuantData : "אין נתונים\n";
+      prompt += "\n";
+
+      prompt += "תשובות משיבים:\n";
+      if (comments.length > 0) {
+        prompt += comments.map(c => String(c).trim()).join("\n");
+      } else {
+        prompt += "אין תשובות פתוחות";
+      }
+      prompt += "\n\n";
+
+      if (respondentCount < 6 && respondentCount > 0) {
+        prompt += "⚠️ הערה חשובה:\n";
+        prompt += "קבוצה קטנה מאוד (" + respondentCount + " משיבים בלבד).\n";
+        prompt += "הנתונים הסטטיסטיים עלולים להיות מוטים. תייחסי בזהירות.\n\n";
+      }
+
+      if (extraText && extraText.length > 0) {
+        prompt += "הערות נוספות:\n";
+        prompt += extraText + "\n\n";
+      }
+
+      prompt += "בבקשה כתבי סיכום קצר ותמציתי בעברית תקנית.\n";
+
+      console.log("Prompt created, length:", prompt.length);
+      console.log("First 200 chars:", prompt.substring(0, 200));
+
+      // נסה להעתיק
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(
+          function() {
+            console.log("✅ Copied to clipboard successfully");
+            alert("✅ הנתונים הועתקו ללוח!\n\nעכשיו אתה יכול להדביק ב ChatGPT");
+          },
+          function(err) {
+            console.error("❌ Clipboard error:", err);
+            fallbackCopy(prompt);
+          }
+        );
+      } else {
+        console.log("Clipboard API not available, using fallback");
+        fallbackCopy(prompt);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        console.log("✅ Fallback copy successful");
+        alert("✅ הנתונים הועתקו ללוח (דרך חלופית)!\n\nעכשיו אתה יכול להדביק ב ChatGPT");
+      } catch (err) {
+        console.error("❌ Fallback copy failed:", err);
+        alert("❌ לא הצליח להעתיק אוטומטית.\n\nבדוקי את הרשאות הדפדפן או נסי שוב.");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function downloadReportHtml() {
+      const report = document.getElementById("reportContainer");
+      if (!report) {
+        alert("לא נמצא אזור דוח להורדה");
+        return;
+      }
+
+      if (report.classList.contains("hidden")) {
+        alert("ראשית העלי קובץ CSV כדי ליצור דוח");
+        return;
+      }
+
+      const ws = document.getElementById("valWorkshop");
+      const filename = (ws && ws.value) ? String(ws.value).replace(/[\\/:*?\"<>|]/g, "_") + ".html" : "דוח_משוב.html";
+
+      const htmlContent = "<!DOCTYPE html>\n" +
+        "<html lang='he' dir='rtl'>\n" +
+        "<head>\n" +
+        "  <meta charset='UTF-8'>\n" +
+        "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" +
+        "  <title>" + (ws && ws.value ? String(ws.value) : "דוח משוב") + "</title>\n" +
+        "</head>\n" +
+        "<body style='font-family: Arial, sans-serif; direction: rtl; background: #f8fafc; color: #0f172a;'>\n" +
+        report.outerHTML + "\n" +
+        "</body>\n" +
+        "</html>";
+
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+
+      alert("הדוח הורד בהצלחה כ- " + filename);
+    }
+  </script>
+
+</body></html>
