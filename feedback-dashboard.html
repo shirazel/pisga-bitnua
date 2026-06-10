@@ -552,7 +552,10 @@
       }
 
       const ws = document.getElementById("valWorkshop");
-      const filename = (ws && ws.value) ? String(ws.value).replace(/[\\/:*?\"<>|]/g, "_") + ".html" : "דוח_משוב.html";
+      const sch = document.getElementById("valSchool");
+      const workshop = (ws && ws.value) ? String(ws.value).trim() : "דוח משוב";
+      const school = (sch && sch.value) ? String(sch.value).trim() : "";
+      const filename = (school ? workshop + " - " + school + ".html" : workshop + ".html").replace(/[\\/:*?\"<>|]/g, "_");
 
       const htmlContent = "<!DOCTYPE html>\n" +
         "<html lang='he' dir='rtl'>\n" +
